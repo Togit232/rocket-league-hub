@@ -1,0 +1,52 @@
+# Holt regelmaessig frische Rocket-League-Daten und veroeffentlicht den Hub auf GitHub Pages.
+name: Hub aktualisieren
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"     # etwa alle 30 Minuten (GitHub startet geplante Laeufe teils verzoegert)
+  workflow_dispatch:            # manueller Start ueber "Run workflow"
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Zwischenspeicher: schont die Datenquellen und merkt sich die Team-Kader zwischen den Laeufen
+      - uses: actions/cache@v4
+        with:
+          path: |
+            cache.json
+            teams_cache.json
+            season_state.json
+          key: hub-cache-${{ github.run_id }}
+          restore-keys: hub-cache-
+      - name: Daten holen und Seite bauen
+        run: python3 export_artifact.py --web _site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

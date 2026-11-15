@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RL Hub">
+<meta name="theme-color" content="#0a0f1c">
+<title>Rocket League Hub</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0a0f1c; --bg2:#0f1729; --card:#141e35; --card2:#1a2644; --line:#243356;
+  --text:#e8eefc; --muted:#8fa0c4; --blue:#2f9bff; --orange:#ff8a1f; --green:#3ddc84; --red:#ff4d5e;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+  radial-gradient(1200px 500px at 0% -10%,rgba(47,155,255,.16),transparent 60%),
+  radial-gradient(1000px 500px at 100% -10%,rgba(255,138,31,.13),transparent 60%),var(--bg);
+  background-attachment:fixed;color:var(--text);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:25;background:var(--bg)}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(10,15,28,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:16px;padding:14px 0 10px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:.3px}
+.logo .mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;
+  background:linear-gradient(135deg,var(--blue) 0 50%,var(--orange) 50% 100%)}
+.logo small{display:block;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0}
+.meta{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--muted);white-space:nowrap}
+.pill b{color:var(--text)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.btn{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card2);font-size:13px;font-weight:600}
+.btn:hover{border-color:var(--blue)}
+.btn[disabled]{opacity:.5;cursor:default}
+nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:0;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;color:var(--muted);font-weight:600;white-space:nowrap}
+nav button:hover{color:var(--text)}
+nav button.on{color:var(--text);border-bottom-color:var(--orange)}
+
+main{padding:22px 0 60px}
+section{display:none}
+section.on{display:block}
+h2{font-size:17px;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+h2 .more{margin-left:auto;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;background:none;border:0}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.gmain{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+@media(max-width:980px){.g2,.g3,.gmain{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.stack{display:flex;flex-direction:column;gap:18px;min-width:0}
+.empty{color:var(--muted);padding:14px 4px;font-size:14px}
+.sub{color:var(--muted);font-size:12.5px}
+
+/* Kennzahlen */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+@media(max-width:980px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;min-width:0}
+.kpi .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.kpi .v{font-size:20px;font-weight:800;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .s{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi a:hover{color:var(--blue)}
+
+/* Spiele */
+.match{display:grid;grid-template-columns:86px minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;padding:10px 6px;border-top:1px solid var(--line)}
+.match:first-child{border-top:0}
+.match .when{font-size:12.5px;color:var(--muted);line-height:1.25}
+.match .when b{display:block;color:var(--text);font-size:13.5px}
+.match .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.match .t.l{text-align:right}
+.match .t.lose{color:var(--muted);font-weight:500}
+.match .sc{font-variant-numeric:tabular-nums;font-weight:800;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:3px 10px;min-width:62px;text-align:center}
+.match .sc.vs{font-weight:600;color:var(--muted);font-size:12.5px}
+.match .tour{grid-column:2/-1;font-size:12px;color:var(--muted);margin-top:-6px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.match .tour a:hover{color:var(--blue)}
+.live{color:var(--red)!important;font-weight:800}
+.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:5px;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.5px;padding:1px 6px;border-radius:5px;background:rgba(255,138,31,.16);color:var(--orange);vertical-align:1px;margin-right:5px}
+.tag.b{background:rgba(47,155,255,.16);color:var(--blue)}
+.tag.g{background:rgba(61,220,132,.15);color:var(--green)}
+.tag.r{background:rgba(255,77,94,.16);color:var(--red)}
+.daysep{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:12px 6px 4px;border-top:1px solid var(--line)}
+.daysep:first-child{border-top:0;padding-top:2px}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.chip{padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;color:var(--muted)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.filters input{flex:1;min-width:180px;max-width:320px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-size:13px;outline:none}
+.filters input:focus{border-color:var(--blue)}
+
+/* Turniere */
+.tcard{display:flex;flex-direction:column;gap:8px}
+.tcard h3{margin:0;font-size:16px}
+.tcard h3 a:hover{color:var(--blue)}
+.tcard .facts{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.km{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;font-size:13.5px;padding:6px 0;border-top:1px dashed var(--line)}
+.km .n{grid-column:1/-1;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.km .a{text-align:right}
+.km .a,.km .b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.km .w{font-weight:800}
+.km .s{font-weight:800;font-variant-numeric:tabular-nums}
+
+/* Tabellen */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 8px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-top:0;font-weight:700;user-select:none}
+th.s{cursor:pointer}
+th.s:hover{color:var(--text)}
+th.act{color:var(--orange)}
+td.n,th.n{text-align:left}
+td.rk{color:var(--muted);width:34px;text-align:left;font-variant-numeric:tabular-nums}
+tr:hover td{background:rgba(255,255,255,.025)}
+.who{display:flex;align-items:center;gap:9px;min-width:0}
+.who img{width:24px;height:24px;object-fit:contain;flex:none}
+.who .nm{font-weight:700}
+.who .rn{color:var(--muted);font-size:12px;font-weight:400}
+.rating{font-weight:800;color:var(--orange);font-variant-numeric:tabular-nums}
+.bar{height:5px;border-radius:3px;background:var(--bg2);min-width:70px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--orange))}
+.up{color:var(--green)} .down{color:var(--red)}
+
+/* News */
+.news{display:flex;gap:12px;padding:11px 4px;border-top:1px solid var(--line)}
+.news:first-child{border-top:0}
+.news:hover .ti{color:var(--blue)}
+.news img{width:92px;height:58px;object-fit:cover;border-radius:8px;flex:none;background:var(--bg2)}
+.news .ti{font-weight:650;line-height:1.3}
+.news .su{color:var(--muted);font-size:13px;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.news .mt{color:var(--muted);font-size:12px;margin-top:4px}
+.newsgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px}
+@media(max-width:980px){.newsgrid{grid-template-columns:minmax(0,1fr)}}
+
+/* Patch Notes */
+.patch{border-top:1px solid var(--line);padding:12px 4px}
+.patch:first-child{border-top:0}
+.patch summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:baseline}
+.patch summary::-webkit-details-marker{display:none}
+.patch summary .ti{font-weight:700;flex:1}
+.patch summary::after{content:"＋";color:var(--muted)}
+.patch[open] summary::after{content:"－"}
+.patch .body{white-space:pre-line;color:#cdd7ee;font-size:14px;margin:10px 0 6px;padding:12px 14px;background:var(--bg2);border-radius:10px;border:1px solid var(--line)}
+.patch .lnk{color:var(--blue);font-size:13px;font-weight:600}
+
+/* Links */
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.lnkc{display:block;padding:13px 15px;border-radius:12px;background:var(--card2);border:1px solid var(--line)}
+.lnkc:hover{border-color:var(--blue)}
+.lnkc b{display:block}
+.lnkc span{color:var(--muted);font-size:13px}
+
+/* Team-Feld */
+.tl{cursor:pointer}
+.tl:hover{color:var(--blue);text-decoration:underline}
+#teamBack{position:fixed;inset:0;z-index:50;background:rgba(4,7,14,.66);backdrop-filter:blur(3px);display:none;justify-content:flex-end}
+#teamBack.on{display:flex}
+#teamPanel{width:min(520px,100%);height:100%;overflow-y:auto;background:var(--bg2);border-left:1px solid var(--line);padding:calc(22px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) 22px;animation:slide .18s ease-out}
+@keyframes slide{from{transform:translateX(40px);opacity:0}}
+.th{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.th img{width:56px;height:56px;object-fit:contain;flex:none}
+.th h3{margin:0;font-size:22px;line-height:1.15}
+.th .x{margin-left:auto;align-self:flex-start;background:var(--card2);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;font-size:16px;flex:none}
+.th .x:hover{border-color:var(--blue)}
+.tfacts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.tsec{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:20px 0 8px}
+.person{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--line);margin-bottom:8px}
+.person .fl{font-size:22px;width:28px;text-align:center;flex:none}
+.person .pn{font-weight:700}
+.person .pr{color:var(--muted);font-size:13px}
+.person .ro{margin-left:auto;text-align:right;color:var(--muted);font-size:12.5px;flex:none;max-width:45%}
+.tres{display:flex;gap:10px;padding:8px 2px;border-top:1px solid var(--line);font-size:14px}
+.tres:first-of-type{border-top:0}
+.tres .pl{font-weight:800;color:var(--orange);width:62px;flex:none}
+.tres .pz{margin-left:auto;color:var(--muted);flex:none}
+.tlinks{display:flex;flex-wrap:wrap;gap:8px}
+.tnote{color:var(--muted);font-size:13px;margin-top:6px}
+.tstat{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-size:13.5px;line-height:1.5}
+.tstat.warn{border-color:rgba(255,138,31,.55);background:rgba(255,138,31,.07)}
+.tstat b.h{display:block;margin-bottom:2px}
+.tstat .r{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.tstat .r .sub{flex:1;min-width:160px}
+.tstat a{color:var(--blue);font-weight:600}
+.trf{display:flex;gap:10px;align-items:baseline;padding:7px 2px;border-top:1px solid var(--line);font-size:14px}
+.trf:first-of-type{border-top:0}
+.trf .ar{width:18px;flex:none;font-weight:800}
+.trf .dt{margin-left:auto;color:var(--muted);font-size:12.5px;flex:none}
+
+#qrBack{position:fixed;inset:0;z-index:60;background:rgba(4,7,14,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:16px}
+#qrBack.on{display:flex}
+#qrBox{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:22px;max-width:380px;width:100%;text-align:center;max-height:100%;overflow-y:auto}
+#qrBox h3{margin:0 0 4px;font-size:19px}
+#qrImg{background:#fff;border-radius:14px;padding:14px;margin:16px auto 12px;width:max-content;max-width:100%}
+#qrImg svg{display:block;width:240px;height:240px;max-width:100%}
+#qrBox .u{font-weight:700;word-break:break-all}
+#qrBox ol{text-align:left;color:var(--muted);font-size:13.5px;padding-left:20px;margin:14px 0}
+
+.loading{padding:80px 0;text-align:center;color:var(--muted)}
+.spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--orange);border-radius:50%;margin:0 auto 14px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding:18px 0 40px}
+footer .src{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+footer .src span{padding:3px 9px;border-radius:999px;border:1px solid var(--line)}
+footer .src .bad{border-color:var(--red);color:var(--red)}
+footer a{color:var(--blue)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo"><div class="mark">🚀</div><div>Rocket League Hub<small>RLCS · Ergebnisse · News · Patch Notes</small></div></div>
+      <div class="meta">
+        <span class="pill" id="pPlayers" hidden><span class="dot"></span><b id="vPlayers">–</b> gerade auf Steam</span>
+        <span class="pill" id="pUpdated">Lade …</span>
+        <button class="btn" id="btnPhone">📱 Aufs Handy</button>
+        <button class="btn" id="btnRefresh">↻ Aktualisieren</button>
+      </div>
+    </div>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="loading" id="loading"><div class="spin"></div>Daten werden geladen …</div>
+  <section id="s-overview"></section>
+  <section id="s-matches"></section>
+  <section id="s-tournaments"></section>
+  <section id="s-rankings"></section>
+  <section id="s-news"></section>
+  <section id="s-patch"></section>
+  <section id="s-community"></section>
+  <section id="s-links"></section>
+</main>
+
+<div id="teamBack"><aside id="teamPanel" role="dialog" aria-label="Team-Details"></aside></div>
+
+<div id="qrBack"><div id="qrBox" role="dialog" aria-label="Aufs Handy holen"></div></div>
+
+<footer><div class="wrap">
+  Daten: Spiele von <a href="https://liquipedia.net/rocketleague/" target="_blank" rel="noopener">Liquipedia</a> (CC-BY-SA 3.0),
+  Turniere, Rankings &amp; Statistiken von <a href="https://blast.tv/rl" target="_blank" rel="noopener">BLAST.tv</a>,
+  Entwickler-News über Steam, Community über Reddit, Szene-News von SHIFT. Inoffizielles Fan-Projekt.
+  <div class="src" id="srcStatus"></div>
+</div></footer>
+
+<script>
+"use strict";
+const TABS = [["overview","Übersicht"],["matches","Spiele"],["tournaments","Turniere"],["rankings","Rankings"],
+              ["news","News"],["patch","Patch Notes"],["community","Community"],["links","Nützliches"]];
+const S = {data:null, tab:(location.hash||"#overview").slice(1), mFilter:"rlcs", mView:"results", mQuery:"",
+           region:"Alle", pSet:0, pSort:"rating", pDir:-1, nFilter:"Alle", cFilter:"Alle"};
+const STATIC = !!window.RL_STATIC;   // true = veroeffentlichte Version mit Daten-Schnappschuss (data.json)
+const $ = id => document.getElementById(id);
+const nkey = s => String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const url = u => /^https?:\/\//i.test(u || "") ? esc(u) : "#";
+const nf = new Intl.NumberFormat("de-DE");
+const fT = new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit"});
+const fD = new Intl.DateTimeFormat("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"});
+const fDL = new Intl.DateTimeFormat("de-DE",{weekday:"long",day:"numeric",month:"long"});
+const fDY = new Intl.DateTimeFormat("de-DE",{day:"numeric",month:"short",year:"numeric"});
+const d = ts => new Date(ts*1000);
+const num = (v,dig=2) => v==null ? "–" : Number(v).toLocaleString("de-DE",{minimumFractionDigits:dig,maximumFractionDigits:dig});
+function ago(ts){
+  if(!ts) return "";
+  const s = Date.now()/1000 - ts;
+  if(s < 90) return "gerade eben";
+  if(s < 3600) return `vor ${Math.round(s/60)} Min.`;
+  if(s < 86400) return `vor ${Math.round(s/3600)} Std.`;
+  if(s < 86400*14) return `vor ${Math.round(s/86400)} Tagen`;
+  return fDY.format(d(ts));
+}
+function dayLabel(ts){
+  const a = new Date(), b = d(ts), day = x => new Date(x.getFullYear(),x.getMonth(),x.getDate()).getTime();
+  const diff = Math.round((day(b)-day(a))/86400000);
+  if(diff===0) return "Heute"; if(diff===1) return "Morgen"; if(diff===-1) return "Gestern";
+  return fDL.format(b);
+}
+function flag(cc){
+  if(!cc || !/^[A-Za-z]{2}$/.test(cc)) return "";
+  return String.fromCodePoint(...cc.toUpperCase().split("").map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+}
+const IMAGES = !STATIC || !!window.RL_IMAGES;   // im Claude-Artefakt sind fremde Bilder gesperrt
+const teamLogo = id => id && IMAGES ? `<img loading="lazy" alt="" src="https://assets.blast.tv/images/teams/${esc(id)}">` : "";
+document.addEventListener("error", e => { if(e.target.tagName==="IMG") e.target.style.display="none"; }, true);
+
+/* ---------- Bausteine ---------- */
+function tAttr(name, id, lp){
+  if(!name || /^(TBD|TBA)$/i.test(name)) return "";
+  return ` data-team="${esc(name)}"${id?` data-team-id="${esc(id)}"`:""}${lp?` data-team-lp="${esc(lp)}"`:""}`;
+}
+const tCls = name => name && !/^(TBD|TBA)$/i.test(name) ? " tl" : "";
+function matchRow(m, mode){
+  const now = Date.now()/1000, isLive = !m.finished && m.ts <= now;
+  const when = isLive ? `<b class="live">LIVE</b>seit ${fT.format(d(m.ts))}` : `<b>${fT.format(d(m.ts))}</b>${fD.format(d(m.ts))}`;
+  const sc = m.finished || (isLive && m.scoreL!=null && m.scoreL!=="")
+    ? `<span class="sc">${esc(m.scoreL||0)} : ${esc(m.scoreR||0)}</span>` : `<span class="sc vs">vs</span>`;
+  const cl = t => m.finished && !t.winner ? " lose" : "";
+  return `<div class="match">
+    <div class="when">${when}</div>
+    <div class="t l${cl(m.left)}${tCls(m.left.name)}"${tAttr(m.left.name,null,m.left.name)} title="${esc(m.left.name)}">${esc(m.left.name)}</div>${sc}
+    <div class="t${cl(m.right)}${tCls(m.right.name)}"${tAttr(m.right.name,null,m.right.name)} title="${esc(m.right.name)}">${esc(m.right.name)}</div>
+    <div class="tour">${m.rlcs?'<span class="tag">RLCS</span>':''}<a href="${url(m.url)}" target="_blank" rel="noopener">${esc(m.tournament)}</a></div>
+  </div>`;
+}
+function matchList(list, withDays){
+  if(!list.length) return `<div class="empty">Keine Spiele gefunden.</div>`;
+  let out = "", last = "";
+  for(const m of list){
+    if(withDays){ const l = dayLabel(m.ts); if(l!==last){ out += `<div class="daysep">${esc(l)}</div>`; last = l; } }
+    out += matchRow(m);
+  }
+  return out;
+}
+function newsRow(n, showSummary=true){
+  return `<a class="news" href="${url(n.url)}" target="_blank" rel="noopener">
+    ${n.image?`<img loading="lazy" alt="" src="${url(n.image)}">`:""}
+    <div style="min-width:0"><div class="ti">${n.kind==="patch"?'<span class="tag g">PATCH</span>':""}${esc(n.title)}</div>
+    ${showSummary&&n.summary?`<div class="su">${esc(n.summary)}</div>`:""}
+    <div class="mt">${esc(n.source)}${n.author?" · "+esc(n.author):""} · ${ago(n.ts)}</div></div></a>`;
+}
+function keyMatch(k){
+  const done = k.scoreA!=null && k.scoreB!=null && (k.scoreA+k.scoreB>0 || (k.ts && k.ts < Date.now()/1000 - 3*3600)), aw = done && k.scoreA>k.scoreB, bw = done && k.scoreB>k.scoreA;
+  return `<div class="km"><div class="n">${esc(k.name||"")}${k.format?" · "+esc(k.format):""}${k.ts&&!done?" · "+fD.format(d(k.ts))+" "+fT.format(d(k.ts)):""}</div>
+    <div class="a${aw?" w":""}${tCls(k.teamA)}"${tAttr(k.teamA,k.teamAId)}>${esc(k.teamA)}</div><div class="s">${done?`${k.scoreA} : ${k.scoreB}`:"vs"}</div><div class="b${bw?" w":""}${tCls(k.teamB)}"${tAttr(k.teamB,k.teamBId)}>${esc(k.teamB)}</div></div>`;
+}
+function tourCard(t, state){
+  const tag = state==="live" ? '<span class="tag r">LÄUFT</span>' : state==="upcoming" ? '<span class="tag b">DEMNÄCHST</span>' : '<span class="tag">BEENDET</span>';
+  const range = t.start ? fDY.format(d(t.start)) + (t.end ? " – " + fDY.format(d(t.end)) : "") : "";
+  const ms = (t.todaysMatches.length ? t.todaysMatches : t.keyMatches);
+  return `<div class="card tcard"><div>${tag}</div><h3><a href="${url(t.url)}" target="_blank" rel="noopener">${esc(t.name)}</a></h3>
+    <div class="facts"><span>📅 ${esc(range)}</span>${t.teams?`<span>👥 ${t.teams} Teams</span>`:""}${t.prize?`<span>🏆 ${esc(t.prize)}</span>`:""}</div>
+    ${ms.length?`<div><div class="sub" style="margin:4px 0">${t.todaysMatches.length?"Heutige Spiele":"Schlüsselspiele"}</div>${ms.map(keyMatch).join("")}</div>`:""}</div>`;
+}
+const chips = (opts, cur, key) => opts.map(o => `<button class="chip${o[0]===cur?" on":""}" data-set="${key}" data-val="${esc(o[0])}">${esc(o[1]??o[0])}</button>`).join("");
+
+/* ---------- Seiten ---------- */
+function rOverview(D){
+  const M = D.matches, rl = l => { const r = l.filter(m => m.rlcs); return r.length ? r : l; };
+  const live = M.live, up = rl(M.upcoming).slice(0,6), res = rl(M.results).slice(0,8);
+  const top = D.ranking[0], ps = D.playerSets[0], tp = ps && ps.players[0];
+  const patch = D.official.find(o => o.kind==="patch");
+  const cur = D.tournaments.live[0] || D.tournaments.upcoming[0];
+  const kpi = (l,v,s,href) => `<div class="kpi"><div class="l">${l}</div><div class="v">${href?`<a href="${url(href)}" target="_blank" rel="noopener">${v}</a>`:v}</div><div class="s">${s}</div></div>`;
+  return `<div class="kpis">
+    ${kpi("Nr. 1 Team der Welt", top?`<span class="tl"${tAttr(top.name,top.id)}>${esc(top.name)}</span>`:"–", top?`${esc(top.region)} · ${nf.format(Math.round(top.rating))} Punkte`:"")}
+    ${kpi("Bester Spieler (Rating)", tp?`${flag(tp.country)} ${esc(tp.name)}`:"–", tp?`${esc(tp.team||"")} · ${num(tp.rating)}`:"")}
+    ${kpi(D.tournaments.live.length?"Läuft gerade":"Nächstes Turnier", cur?esc(cur.name):"–", cur&&cur.start?fDY.format(d(cur.start))+(cur.end?" – "+fDY.format(d(cur.end)):""):"", cur&&cur.url)}
+    ${kpi("Aktuelle Season", D.season?`Season ${D.season.number}`:"–", patch?`Letzter Patch: ${esc(patch.title.replace(/^Rocket League\s*/,""))}`:"", D.season&&D.season.url)}
+  </div>
+  <div class="grid gmain">
+    <div class="stack">
+      ${live.length?`<div class="card"><h2><span class="live">Live</span></h2>${matchList(live)}</div>`:""}
+      <div class="card"><h2>Letzte Ergebnisse <button class="more" data-go="matches" data-view="results">Alle →</button></h2>${matchList(res,true)}</div>
+      <div class="card"><h2>Nächste Spiele <button class="more" data-go="matches" data-view="upcoming">Alle →</button></h2>${matchList(up,true)}</div>
+    </div>
+    <div class="stack">
+      <div class="card"><h2>Top-Teams <button class="more" data-go="rankings">Ranking →</button></h2>
+        <table><tbody>${D.ranking.slice(0,8).map(t => `<tr><td class="rk">${t.rank}</td><td class="n"><div class="who tl"${tAttr(t.name,t.id)}>${teamLogo(t.id)}<span class="nm">${esc(t.name)}</span></div></td><td class="sub">${esc(t.region)}</td><td class="rating">${nf.format(Math.round(t.rating))}</td></tr>`).join("")||'<tr><td class="empty">Keine Daten.</td></tr>'}</tbody></table></div>
+      <div class="card"><h2>Top-Spieler <button class="more" data-go="rankings">Statistik →</button></h2>
+        <div class="sub" style="margin:-6px 0 6px">${ps?esc(ps.label):""}</div>
+        <table><tbody>${ps?ps.players.slice(0,8).map((p,i) => `<tr><td class="rk">${i+1}</td><td class="n"><div class="who"><span>${flag(p.country)}</span><span class="nm">${esc(p.name)}</span></div></td><td class="sub${tCls(p.team)}"${tAttr(p.team,p.teamId)}>${esc(p.team||"")}</td><td class="rating">${num(p.rating)}</td></tr>`).join(""):'<tr><td class="empty">Keine Daten.</td></tr>'}</tbody></table></div>
+      <div class="card"><h2>Neueste Meldungen <button class="more" data-go="news">Alle →</button></h2>${D.news.slice(0,5).map(n => newsRow({...n,image:null},false)).join("")||'<div class="empty">Keine News.</div>'}</div>
+      <div class="card"><h2>Aus der Community <button class="more" data-go="community">Alle →</button></h2>${D.community.slice(0,5).map(n => newsRow({...n,image:null},false)).join("")||'<div class="empty">Zurzeit nicht erreichbar.</div>'}</div>
+    </div>
+  </div>`;
+}
+function rMatches(D){
+  const M = D.matches, q = S.mQuery.trim().toLowerCase();
+  const f = l => l.filter(m => (S.mFilter==="all" || m.rlcs) && (!q || (m.left.name+" "+m.right.name+" "+m.left.short+" "+m.right.short+" "+m.tournament).toLowerCase().includes(q)));
+  const live = f(M.live), list = f(S.mView==="results" ? M.results : M.upcoming);
+  return `<div class="filters">
+    ${chips([["results","Ergebnisse"],["upcoming","Anstehend"]], S.mView, "mView")}
+    <span style="width:10px"></span>
+    ${chips([["rlcs","Nur RLCS"],["all","Alle Turniere"]], S.mFilter, "mFilter")}
+    <input id="mQuery" placeholder="Team oder Turnier suchen …" value="${esc(S.mQuery)}">
+  </div>
+  ${live.length?`<div class="card" style="margin-bottom:18px"><h2><span class="live">Live</span></h2>${matchList(live)}</div>`:""}
+  <div class="card"><h2>${S.mView==="results"?"Ergebnisse":"Anstehende Spiele"} <span class="sub">${list.length} Spiele · Uhrzeiten in deiner Ortszeit</span></h2>${matchList(list,true)}</div>`;
+}
+function rTournaments(D){
+  const T = D.tournaments, sec = (title, list, st) => list.length ? `<h2 style="margin-top:8px">${title}</h2><div class="grid g2" style="margin-bottom:22px">${list.map(t => tourCard(t,st)).join("")}</div>` : "";
+  return (sec("Läuft gerade", T.live, "live") + sec("Demnächst", T.upcoming, "upcoming") + sec("Zuletzt beendet", T.past, "past"))
+    || `<div class="empty">Keine Turnierdaten verfügbar.</div>`;
+}
+const PCOLS = [["rating","Rating",2],["games","Spiele",0],["goals","Tore/Sp.",2],["assists","Assists/Sp.",2],["saves","Saves/Sp.",2],["shots","Schüsse/Sp.",2],["shootPct","Schuss-%",1],["score","Score/Sp.",0],["demos","Demos/Sp.",2]];
+function rRankings(D){
+  const regions = ["Alle", ...new Set(D.ranking.map(t => t.region).filter(Boolean))];
+  const teams = D.ranking.filter(t => S.region==="Alle" || t.region===S.region).slice(0,30);
+  const max = teams.length ? teams[0].rating : 1;
+  const set = D.playerSets[S.pSet] || D.playerSets[0];
+  const players = set ? [...set.players].sort((a,b) => ((a[S.pSort]??-1e9)-(b[S.pSort]??-1e9))*S.pDir).slice(0,40) : [];
+  return `<div class="grid gmain" style="grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)">
+    <div class="card"><h2>Team-Power-Ranking</h2>
+      <div class="filters">${chips(regions.map(r => [r]), S.region, "region")}</div>
+      <div class="tw"><table><thead><tr><th class="n">#</th><th class="n">Team</th><th>Region</th><th>Punkte</th><th></th></tr></thead><tbody>
+      ${teams.map((t,i) => `<tr><td class="rk">${S.region==="Alle"?t.rank:i+1}</td><td class="n"><div class="who tl"${tAttr(t.name,t.id)}>${teamLogo(t.id)}<span class="nm">${esc(t.name)}</span></div></td>
+        <td class="sub">${esc(t.region)}</td><td class="rating">${nf.format(Math.round(t.rating))}</td><td><div class="bar"><i style="width:${Math.max(4,Math.round(t.rating/max*100))}%"></i></div></td></tr>`).join("")||'<tr><td class="empty">Keine Daten.</td></tr>'}
+      </tbody></table></div></div>
+    <div class="card"><h2>Erfolgreichste Spieler</h2>
+      <div class="filters">${chips(D.playerSets.map((s,i) => [String(i), s.label]), String(S.pSet), "pSet")}</div>
+      <div class="tw"><table><thead><tr><th class="n">#</th><th class="n">Spieler</th><th class="n">Team</th>
+        ${PCOLS.map(c => `<th class="s${S.pSort===c[0]?" act":""}" data-sort="${c[0]}">${c[1]}${S.pSort===c[0]?(S.pDir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>
+      ${players.map((p,i) => `<tr><td class="rk">${i+1}</td><td class="n"><div class="who"><span>${flag(p.country)}</span><span><span class="nm">${esc(p.name)}</span>${p.realName?`<br><span class="rn">${esc(p.realName)}</span>`:""}</span></div></td>
+        <td class="n sub${tCls(p.team)}"${tAttr(p.team,p.teamId)}>${esc(p.team||"–")}</td>${PCOLS.map(c => `<td class="${c[0]==="rating"?"rating":""}">${num(p[c[0]],c[2])}</td>`).join("")}</tr>`).join("")||'<tr><td class="empty">Keine Daten.</td></tr>'}
+      </tbody></table></div>
+      <div class="sub" style="margin-top:10px">Rating = BLAST „Rocket League Rating“ aus Profi-Spielen. Spaltenkopf anklicken zum Sortieren.${set?` <a href="${url(set.url)}" target="_blank" rel="noopener" style="color:var(--blue)">Volle Statistik →</a>`:""}</div>
+    </div></div>`;
+}
+function rNews(D){
+  const kinds = [["Alle"],["esports","Esports"],["dev","Entwickler"],["patch","Patch Notes"],["press","Presse"]];
+  const list = D.news.filter(n => S.nFilter==="Alle" || n.kind===S.nFilter);
+  return `<div class="filters">${chips(kinds, S.nFilter, "nFilter")}</div>
+    <div class="card"><div class="newsgrid">${list.map(n => newsRow(n)).join("")||'<div class="empty">Keine News in dieser Kategorie.</div>'}</div></div>`;
+}
+function rPatch(D){
+  const patches = D.official.filter(o => o.kind==="patch"), dev = D.official.filter(o => o.kind!=="patch");
+  const item = (o,open) => `<details class="patch"${open?" open":""}><summary><span class="ti">${esc(o.title)}</span><span class="sub">${fDY.format(d(o.ts))}</span></summary>
+    <div class="body">${esc(o.body||o.summary||"")}</div><a class="lnk" href="${url(o.url)}" target="_blank" rel="noopener">Original bei Psyonix/Steam öffnen →</a></details>`;
+  return `<div class="grid g2">
+    <div class="card"><h2>Patch Notes</h2>${patches.map((o,i) => item(o,i===0)).join("")||'<div class="empty">Keine Patch Notes gefunden.</div>'}</div>
+    <div class="card"><h2>Neues vom Entwickler (Psyonix)</h2>${dev.map(o => item(o,false)).join("")||'<div class="empty">Keine Meldungen gefunden.</div>'}</div>
+  </div>`;
+}
+function rCommunity(D){
+  const subs = ["Alle", ...new Set(D.community.map(c => c.source))];
+  const list = D.community.filter(c => S.cFilter==="Alle" || c.source===S.cFilter);
+  return `<div class="filters">${chips(subs.map(s => [s]), S.cFilter, "cFilter")}</div>
+    <div class="card"><div class="newsgrid">${list.map(n => newsRow(n)).join("")||'<div class="empty">Reddit ist gerade nicht erreichbar – später erneut versuchen.</div>'}</div></div>`;
+}
+const LINKS = [
+  ["Esports schauen & verfolgen", [
+    ["Rocket League auf Twitch","Offizieller RLCS-Livestream","https://www.twitch.tv/rocketleague"],
+    ["Rocket League Esports (YouTube)","VODs, Highlights, Zusammenfassungen","https://www.youtube.com/@RLEsports"],
+    ["BLAST.tv – Rocket League","Turnierbäume, Statistiken, Fantasy","https://blast.tv/rl"],
+    ["Liquipedia Rocket League","Wiki: Teams, Spieler, Transfers, Turniere","https://liquipedia.net/rocketleague/Main_Page"],
+    ["Transfers (Liquipedia)","Wer wechselt wohin? Roster-Moves","https://liquipedia.net/rocketleague/Portal:Transfers"],
+    ["SHIFT","Szene-News und Gerüchte","https://shiftrle.gg/"]]],
+  ["Eigene Stats & besser werden", [
+    ["RL Tracker Network","Eigener Rang, MMR und Verlauf","https://rocketleague.tracker.network/"],
+    ["Rang-Verteilung","Wie viel Prozent sind in welchem Rang?","https://rocketleague.tracker.network/rocket-league/distribution"],
+    ["Ballchasing","Replays hochladen und analysieren","https://ballchasing.com/"],
+    ["BakkesMod","Trainings-Mod für PC (Freeplay-Tools)","https://bakkesmod.com/"],
+    ["Pro-Kameraeinstellungen","Kamera & Controller der Profis","https://liquipedia.net/rocketleague/List_of_player_camera_settings"]]],
+  ["Spiel, Season & Shop", [
+    ["Offizielle News","Blog von Psyonix","https://www.rocketleague.com/news"],
+    ["Season-Timer","Countdown bis Season-Ende","https://seasontimer.live/rocketleague/"],
+    ["Item-Shop heute","Tägliche & Featured Items","https://rocket-league.com/items/shop"],
+    ["Server-Status","Epic Games Status-Seite","https://status.epicgames.com/"],
+    ["r/RocketLeague","Größte Community","https://www.reddit.com/r/RocketLeague/"],
+    ["r/RocketLeagueEsports","Esports-Diskussionen & Match-Threads","https://www.reddit.com/r/RocketLeagueEsports/"]]]];
+function rLinks(){
+  return LINKS.map(g => `<div class="card" style="margin-bottom:18px"><h2>${g[0]}</h2><div class="links">${g[1].map(l =>
+    `<a class="lnkc" href="${l[2]}" target="_blank" rel="noopener"><b>${l[0]} ↗</b><span>${l[1]}</span></a>`).join("")}</div></div>`).join("");
+}
+const RENDER = {overview:rOverview, matches:rMatches, tournaments:rTournaments, rankings:rRankings, news:rNews, patch:rPatch, community:rCommunity, links:rLinks};
+
+/* ---------- Team-Feld ---------- */
+const ROLE_DE = r => !r ? "" : ({player:"Spieler",coach:"Coach",substitute:"Ersatzspieler"}[r] || r);
+function personRow(p, role){
+  return `<div class="person"><span class="fl">${flag(p.country)||"👤"}</span>
+    <div style="min-width:0"><div class="pn">${esc(p.name)}</div>${p.realName?`<div class="pr">${esc(p.realName)}${p.age?` · ${p.age} Jahre`:""}</div>`:(p.age?`<div class="pr">${p.age} Jahre</div>`:"")}</div>
+    <div class="ro">${esc(role)}</div></div>`;
+}
+function teamSection(title, list, roleFn, emptyText){
+  return `<div class="tsec">${title}</div>` + (list.length ? list.map(p => personRow(p, roleFn(p))).join("") : `<div class="tnote">${emptyText}</div>`);
+}
+function teamStatus(T){
+  const c = T.check || {}, reg = T.registration || {registered:[],checked:[],unknown:[]}, off = c.offseason;
+  const day = ts => fDY.format(d(ts));
+  let head, rule;
+  if(c.complete){
+    head = `✓ Kader vollständig (${c.playerCount} Spieler)`;
+    rule = "Wird einmal pro Off-Season aktualisiert" + (off ? (off.active
+      ? ` – das Transferfenster ist gerade offen (seit ${day(off.start)}${off.end?`, bis ${day(off.end)}`:""}).`
+      : ` – letzte Off-Season: ${day(off.start)} – ${day(off.end)}.`) : ".");
+  }else{
+    head = c.playerCount ? `⚠ Kader unvollständig (${c.playerCount} von ${c.fullRoster} Spielern)` : "⚠ Keine Spieler eingetragen";
+    rule = `Wird wöchentlich nachgeprüft – nächste Prüfung ab ${day(c.nextCheck)}.`;
+  }
+  let regTxt;
+  if(reg.registered.length) regTxt = "Angemeldet für: " + reg.registered.map(r => `<a href="${url(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a>${r.live?" (läuft)":""}`).join(", ") + ".";
+  else if(reg.checked.length) regTxt = `Für kein aktuelles RLCS-Turnier angemeldet (geprüft: ${reg.checked.map(esc).join(", ")}).`;
+  else regTxt = "Zurzeit gibt es kein RLCS-Turnier mit veröffentlichter Teilnehmerliste.";
+  if(reg.unknown.length) regTxt += ` Teilnehmer noch offen: ${reg.unknown.map(esc).join(", ")}.`;
+  let moved = "";
+  if(!c.complete){
+    const outs = (T.transfers||[]).filter(t => t.type==="out").slice(0,4);
+    if(outs.length) moved = `<div style="margin-top:6px">Zuletzt gegangen: ${outs.map(t => `<b>${esc(t.player)}</b> → ${t.team?`<span class="tl"${tAttr(t.team,t.teamId)}>${esc(t.team)}</span>`:"ohne neues Team"}`).join(", ")}.</div>`;
+  }
+  return `<div class="tstat${c.complete?"":" warn"}"><b class="h">${head}</b>${rule}<div style="margin-top:6px">${regTxt}</div>${moved}
+    <div class="r"><span class="sub">Stand: ${day(T.fetched)}, ${fT.format(d(T.fetched))} Uhr</span>${STATIC?"":'<button class="btn" data-team-refresh>↻ Jetzt aktualisieren</button>'}</div></div>`;
+}
+function transferRow(t){
+  const inn = t.type==="in";
+  const other = t.team ? `<span class="tl"${tAttr(t.team,t.teamId)}>${esc(t.team)}</span>` : (inn ? "ohne vorheriges Team" : "ohne neues Team");
+  return `<div class="trf"><span class="ar ${inn?"up":"down"}">${inn?"+":"−"}</span><span>${flag(t.country)} <b>${esc(t.player)}</b>${t.role&&t.role!=="player"?` (${esc(ROLE_DE(t.role))})`:""} ${inn?"kommt von":"geht zu"} ${other}</span><span class="dt">${t.ts?fDY.format(d(t.ts)):""}</span></div>`;
+}
+let teamReq = 0, teamCur = null;
+function closeTeam(){ $("teamBack").classList.remove("on"); teamReq++; }
+async function openTeam(name, id, lp, force){
+  const my = ++teamReq, panel = $("teamPanel");
+  teamCur = {name, id, lp};
+  const head = (n, tid, extra="") => `<div class="th">${tid&&IMAGES?`<img alt="" src="https://assets.blast.tv/images/teams/${esc(tid)}">`:""}<div><h3>${esc(n)}</h3>${extra}</div><button class="x" data-close aria-label="Schließen">✕</button></div>`;
+  panel.innerHTML = head(name, id) + `<div class="loading" style="padding:50px 0"><div class="spin"></div>Team wird geladen …</div>`;
+  $("teamBack").classList.add("on"); panel.scrollTop = 0;
+  try{
+    let T;
+    if(STATIC){
+      const all = S.data.teams || {}, names = S.data.teamNames || {}, k = nkey(name);
+      T = (id && all[id]) || all[names[k]] || all[names[k.replace(/(esports?|gaming|team|club)/g,"")]];
+      if(!T){ panel.innerHTML = head(name, id) + `<div class="tnote">Für dieses Team sind in dieser Online-Version keine Details gespeichert. Enthalten sind die Top-Teams der Weltrangliste und die Teams der aktuellen RLCS-Turniere.</div>`; return; }
+    }else{
+      const q = new URLSearchParams({name}); if(id) q.set("id", id); if(lp) q.set("lp", lp); if(force) q.set("force", "1");
+      const r = await fetch("/api/team?"+q); if(!r.ok) throw new Error("HTTP "+r.status);
+      T = await r.json(); if(my !== teamReq) return;
+    }
+    const facts = [];
+    if(T.rank) facts.push(`<span class="pill">Weltrangliste <b>#${T.rank}</b></span>`);
+    if(T.rating) facts.push(`<span class="pill"><b>${nf.format(Math.round(T.rating))}</b> Punkte</span>`);
+    if(T.region) facts.push(`<span class="pill">Region <b>${esc(T.region)}</b></span>`);
+    if(T.location) facts.push(`<span class="pill">Sitz <b>${esc(T.location)}</b></span>`);
+    if(T.created) facts.push(`<span class="pill">Gegründet <b>${esc(T.created.slice(0,4))}</b></span>`);
+    panel.innerHTML = head(T.name, T.id, T.country?`<div class="sub">${flag(T.country)} ${esc(T.country)}</div>`:"")
+      + (facts.length?`<div class="tfacts">${facts.join("")}</div>`:"")
+      + teamStatus(T)
+      + teamSection("Spieler", T.players, () => "Spieler", "Kein Kader bekannt.")
+      + (T.substitutes.length ? teamSection("Ersatzspieler", T.substitutes, () => "Ersatz", "") : "")
+      + teamSection("Coach", T.coaches, p => ROLE_DE(p.role)||"Coach", "Kein Coach angegeben.")
+      + teamSection("Manager", T.managers, p => p.role||"Manager", "Kein Manager angegeben.")
+      + (T.staff.length ? teamSection("Organisation", T.staff, p => p.role||"", "") : "")
+      + (T.results.length ? `<div class="tsec">Letzte Turniere</div>` + T.results.map(x => `<div class="tres"><span class="pl">${esc(x.place||"–")}</span><span>${esc(x.name)}</span><span class="pz">${esc(x.prize||"")}</span></div>`).join("") : "")
+      + ((T.transfers||[]).length ? `<div class="tsec">Letzte Wechsel</div>` + T.transfers.slice(0,8).map(transferRow).join("") : "")
+      + `<div class="tsec">Mehr zum Team</div><div class="tlinks">${Object.entries(T.links).map(([k,v]) => `<a class="btn" href="${url(v)}" target="_blank" rel="noopener">${esc(k)} ↗</a>`).join("")||'<span class="tnote">Keine Links.</span>'}</div>`
+      + T.notes.map(n => `<div class="tnote">ℹ︎ ${esc(n)}</div>`).join("");
+  }catch(err){
+    if(my !== teamReq) return;
+    panel.innerHTML = head(name, id) + `<div class="tnote">Team konnte nicht geladen werden (${esc(err.message)}).</div>`;
+  }
+}
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeTeam(); });
+
+/* ---------- Steuerung ---------- */
+function render(){
+  if(!RENDER[S.tab]) S.tab = "overview";
+  $("nav").innerHTML = TABS.map(t => `<button data-tab="${t[0]}" class="${t[0]===S.tab?"on":""}">${t[1]}</button>`).join("");
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id==="s-"+S.tab));
+  if(!S.data) return;
+  $("s-"+S.tab).innerHTML = RENDER[S.tab](S.data);
+}
+function go(tab){ S.tab = tab; try{ history.replaceState(null,"","#"+tab); }catch(e){ try{ location.hash = tab; }catch(e2){} } render(); window.scrollTo(0,0); }
+document.addEventListener("click", e => {
+  if(e.target.id==="teamBack" || e.target.closest("[data-close]")) return closeTeam();
+  if(e.target.closest("[data-team-refresh]") && teamCur) return openTeam(teamCur.name, teamCur.id, teamCur.lp, true);
+  const tm = e.target.closest("[data-team]");
+  if(tm){ e.preventDefault(); return openTeam(tm.dataset.team, tm.dataset.teamId, tm.dataset.teamLp); }
+  const t = e.target.closest("[data-tab],[data-go],[data-set],[data-sort]");
+  if(!t) return;
+  if(t.dataset.tab) return go(t.dataset.tab);
+  if(t.dataset.go){ if(t.dataset.view) S.mView = t.dataset.view; return go(t.dataset.go); }
+  if(t.dataset.set === "qrMode"){ qrMode = t.dataset.val; return showPhone(); }
+  if(t.dataset.set){ const k = t.dataset.set; S[k] = k==="pSet" ? Number(t.dataset.val) : t.dataset.val; return render(); }
+  if(t.dataset.sort){ if(S.pSort===t.dataset.sort) S.pDir *= -1; else { S.pSort = t.dataset.sort; S.pDir = -1; } return render(); }
+});
+document.addEventListener("input", e => {
+  if(e.target.id!=="mQuery") return;
+  S.mQuery = e.target.value; const pos = e.target.selectionStart;
+  render(); const i = $("mQuery"); i.focus(); i.setSelectionRange(pos,pos);
+});
+async function load(force){
+  const b = $("btnRefresh"); b.disabled = true; b.textContent = "↻ Lädt …";
+  try{
+    const r = STATIC ? await fetch("data.json", {cache:"no-store"}) : await fetch("/api/data"+(force?"?force=1":""));
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    S.data = await r.json();
+    $("loading").hidden = true;
+    if(S.data.steamPlayers!=null){ $("pPlayers").hidden = false; $("vPlayers").textContent = nf.format(S.data.steamPlayers); }
+    $("pUpdated").innerHTML = STATIC ? `Datenstand: <b>${fD.format(d(S.data.generated))}, ${fT.format(d(S.data.generated))} Uhr</b>`
+                                     : `Stand: <b>${fT.format(new Date())} Uhr</b>`;
+    $("srcStatus").innerHTML = S.data.status.map(s => `<span class="${s.ok?"":"bad"}" title="${esc(s.error||"")}">${s.ok?"✓":"✕"} ${esc(s.label)}${s.fetched?" · "+fT.format(d(s.fetched)):""}</span>`).join("");
+    render();
+  }catch(err){
+    $("pUpdated").textContent = "Fehler beim Laden";
+    if(!S.data && STATIC) $("loading").innerHTML = `Die Daten konnten nicht geladen werden (${esc(err.message)}).`;
+    else if(!S.data) $("loading").innerHTML = `Der lokale Server antwortet nicht (${esc(err.message)}).<br>Bitte „Rocket League Hub starten“ erneut ausführen.`;
+  }finally{ b.disabled = false; b.textContent = "↻ Aktualisieren"; }
+}
+/* ---------- Handy / QR-Code ---------- */
+function loadQrLib(){
+  if(window.qrcode) return Promise.resolve();
+  return new Promise((ok, fail) => { const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";
+    sc.onload = ok; sc.onerror = () => fail(new Error("QR-Bibliothek nicht ladbar")); document.head.appendChild(sc); });
+}
+const ONLINE_URL = "https://claude.ai/artifact/4ZXX9Z3ztggC7giw6cYPpd";
+function qrSvg(text){ const qr = qrcode(0, "M"); qr.addData(text); qr.make(); return qr.createSvgTag({cellSize:6, margin:0, scalable:true}); }
+let qrMode = "online";
+async function showPhone(){
+  const box = $("qrBox"), close = `<button class="btn" data-qr-close style="margin-top:6px">Schließen</button>`;
+  box.innerHTML = `<h3>📱 Aufs Handy holen</h3><div class="loading" style="padding:30px 0"><div class="spin"></div></div>`;
+  $("qrBack").classList.add("on");
+  try{
+    const info = await (await fetch("/api/info")).json();
+    const local = /^(localhost|127\.|\[::1\])/.test(location.hostname);
+    const target = (local ? info.urls[0] : location.origin) || null;
+    if(!target){ box.innerHTML = `<h3>📱 Aufs Handy holen</h3><p class="tnote">Keine WLAN-Adresse gefunden. Ist der Mac mit dem WLAN verbunden?</p>${close}`; return; }
+    await loadQrLib();
+    const online = qrMode === "online";
+    box.innerHTML = `<h3>📱 Aufs Handy holen</h3><div class="sub">Mit der Handy-Kamera scannen</div>
+      <div class="filters" style="justify-content:center;margin:14px 0 0">${chips([["online","Online · von überall"],["wlan","Live · im WLAN"]], qrMode, "qrMode")}</div>
+      <div id="qrImg">${qrSvg(online ? ONLINE_URL : target)}</div>
+      <div class="u">${esc(online ? ONLINE_URL : target)}</div>
+      ${!online && info.urls[1] && info.urls[1]!==target ? `<div class="sub">oder ${esc(info.urls[1])}</div>` : ""}
+      ${online
+        ? `<ol><li>Funktioniert überall, auch über mobile Daten.</li><li>Zeigt den Datenstand der letzten täglichen Aktualisierung.</li>
+           <li>Das Handy muss bei Claude angemeldet sein – oder die Seite wurde über „Teilen“ freigegeben.</li></ol>`
+        : `<ol><li>Handy und Mac müssen im selben WLAN sein.</li><li>Der Hub muss auf dem Mac laufen.</li>
+           <li>Zeigt Live-Daten. Tipp: Im Handy-Browser „Zum Home-Bildschirm“ wählen.</li></ol>`}${close}`;
+  }catch(err){ box.innerHTML = `<h3>📱 Aufs Handy holen</h3><p class="tnote">Fehler: ${esc(err.message)}</p>${close}`; }
+}
+if(STATIC) $("btnPhone").hidden = true;
+$("btnPhone").addEventListener("click", showPhone);
+$("qrBack").addEventListener("click", e => { if(e.target.id==="qrBack" || e.target.closest("[data-qr-close]")) $("qrBack").classList.remove("on"); });
+$("btnRefresh").addEventListener("click", () => load(true));
+render(); load(false);
+setInterval(() => load(false), 5*60*1000);
+</script>
+</body>
+</html>

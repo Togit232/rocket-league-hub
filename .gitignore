@@ -1,0 +1,8 @@
+cache.json
+teams_cache.json
+season_state.json
+artifact/
+_site/
+__pycache__/
+*.tmp
+.DS_Store
