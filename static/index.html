@@ -604,7 +604,7 @@ function loadQrLib(){
     sc.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";
     sc.onload = ok; sc.onerror = () => fail(new Error("QR-Bibliothek nicht ladbar")); document.head.appendChild(sc); });
 }
-const ONLINE_URL = "https://claude.ai/artifact/4ZXX9Z3ztggC7giw6cYPpd";
+const ONLINE_URL = "https://togit232.github.io/rocket-league-hub/";
 function qrSvg(text){ const qr = qrcode(0, "M"); qr.addData(text); qr.make(); return qr.createSvgTag({cellSize:6, margin:0, scalable:true}); }
 let qrMode = "online";
 async function showPhone(){
@@ -624,8 +624,8 @@ async function showPhone(){
       <div class="u">${esc(online ? ONLINE_URL : target)}</div>
       ${!online && info.urls[1] && info.urls[1]!==target ? `<div class="sub">oder ${esc(info.urls[1])}</div>` : ""}
       ${online
-        ? `<ol><li>Funktioniert überall, auch über mobile Daten.</li><li>Zeigt den Datenstand der letzten täglichen Aktualisierung.</li>
-           <li>Das Handy muss bei Claude angemeldet sein – oder die Seite wurde über „Teilen“ freigegeben.</li></ol>`
+        ? `<ol><li>Funktioniert überall, auch über mobile Daten und ohne Anmeldung.</li><li>Aktualisiert sich etwa alle 30 Minuten selbst.</li>
+           <li>Tipp: Im Handy-Browser „Zum Home-Bildschirm“ wählen, dann startet der Hub wie eine App.</li></ol>`
         : `<ol><li>Handy und Mac müssen im selben WLAN sein.</li><li>Der Hub muss auf dem Mac laufen.</li>
            <li>Zeigt Live-Daten. Tipp: Im Handy-Browser „Zum Home-Bildschirm“ wählen.</li></ol>`}${close}`;
   }catch(err){ box.innerHTML = `<h3>📱 Aufs Handy holen</h3><p class="tnote">Fehler: ${esc(err.message)}</p>${close}`; }
